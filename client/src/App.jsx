@@ -1,8 +1,20 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Closet from './pages/Closet'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-red-500">ClosetIQ</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/closet" element={<Closet />} />
+        <Route path="/outfit-generator" element={<h1 className="text-3xl font-bold text-center pt-10">Outfit Generator</h1>} />
+        <Route path="/history" element={<h1 className="text-3xl font-bold text-center pt-10">History Page</h1>} />
+        <Route path="/profile" element={<h1 className="text-3xl font-bold text-center pt-10">Profile Page</h1>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
