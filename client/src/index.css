@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+:root {
+  --color-bone: #F7F5F1;
+  --color-ink: #1C1C1A;
+  --color-tan: #8B6F56;
+  --color-camel: #C4A582;
+  --color-sage: #3D5A4C;
+  --color-border: #DCD7CC;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--color-bone);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}

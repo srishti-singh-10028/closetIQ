@@ -1,18 +1,32 @@
 import { mockCloset } from '../data/mockCloset'
+import ClothingCard from '../components/ClothingCard'
+import SeamDivider from '../components/SeamDivider'
 
 function Closet() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Your Closet</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+    <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--color-bone)' }}>
+      <div
+        className="flex justify-between items-baseline border-b pb-4 mb-6"
+        style={{ borderColor: 'var(--color-border)' }}
+      >
+        <span className="font-display text-2xl" style={{ color: 'var(--color-ink)' }}>
+          ClosetIQ
+        </span>
+        <span
+          className="text-xs uppercase tracking-widest"
+          style={{ color: 'var(--color-tan)' }}
+        >
+          Your closet — {mockCloset.length} items
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
         {mockCloset.map((item) => (
-          <div key={item._id} style={{ border: '1px solid #ccc', padding: '1rem' }}>
-            <img src={item.imageUrl} alt={item.category} style={{ width: '100%' }} />
-            <p>{item.category} — {item.color}</p>
-            <p>{item.brand}</p>
-          </div>
+          <ClothingCard key={item._id} item={item} />
         ))}
       </div>
+
+      <SeamDivider label="today's outfit" />
     </div>
   )
 }
