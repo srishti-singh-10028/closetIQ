@@ -8,6 +8,7 @@ import OutfitGenerator from './pages/OutfitGenerator'
 import AddItem from './pages/AddItem'
 import { mockCloset } from './data/mockCloset'
 import Profile from './pages/Profile'
+import History from './pages/History'
 
 function App() {
   const [closet, setCloset] = useState(mockCloset)
@@ -25,7 +26,7 @@ function App() {
         <Route path="/closet" element={<Closet closet={closet} />} />
         <Route path="/outfit-generator" element={<OutfitGenerator closet={closet} />} />
         <Route path="/add-item" element={<AddItem onAddItem={addItem} />} />
-        <Route path="/history" element={<h1 className="text-3xl font-bold text-center pt-10">History Page</h1>} />
+        <Route path="/history" element={<History closet={closet} />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
