@@ -1,18 +1,17 @@
 import { useState } from 'react'
-import { mockCloset } from '../data/mockCloset'
 import ClothingCard from '../components/ClothingCard'
 import SeamDivider from '../components/SeamDivider'
 
-function Closet() {
+function Closet({ closet }) {
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [colorFilter, setColorFilter] = useState('All')
 
   // build dropdown options dynamically from whatever's actually in the closet
-  const categories = ['All', ...new Set(mockCloset.map((item) => item.category))]
-  const colors = ['All', ...new Set(mockCloset.map((item) => item.color))]
+  const categories = ['All', ...new Set(closet.map((item) => item.category))]
+  const colors = ['All', ...new Set(closet.map((item) => item.color))]
 
   // apply both filters together
-  const filteredCloset = mockCloset.filter((item) => {
+  const filteredCloset = closet.filter((item) => {
     const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter
     const matchesColor = colorFilter === 'All' || item.color === colorFilter
     return matchesCategory && matchesColor
@@ -28,7 +27,7 @@ function Closet() {
           ClosetIQ
         </span>
         <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--color-tan)' }}>
-          Your closet — {filteredCloset.length} of {mockCloset.length} items
+          Your closet — {filteredCloset.length} of {closet.length} items
         </span>
       </div>
 

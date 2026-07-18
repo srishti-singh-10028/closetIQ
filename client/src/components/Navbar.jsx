@@ -15,6 +15,7 @@ function Navbar() {
         <Link to="/outfit-generator">Generate</Link>
         <Link to="/history">History</Link>
         <Link to="/profile">Profile</Link>
+        <Link to="/add-item">Add Item</Link>
       </div>
     </nav>
   )

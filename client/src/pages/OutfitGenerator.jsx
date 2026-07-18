@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { mockCloset } from '../data/mockCloset'
 import ClothingCard from '../components/ClothingCard'
 import SeamDivider from '../components/SeamDivider'
 
@@ -14,9 +13,9 @@ const occasionStyleMap = {
   Fest: 'Party',
 }
 
-function generateOutfit(occasion) {
+function generateOutfit(occasion,closet) {
   const targetStyle = occasionStyleMap[occasion]
-  const matching = mockCloset.filter((item) => item.style === targetStyle)
+  const matching = closet.filter((item) => item.style === targetStyle)
 
   const top = matching.find((i) => i.category === 'Top')
   const dress = matching.find((i) => i.category === 'Dress')
@@ -29,12 +28,12 @@ function generateOutfit(occasion) {
   return outfit.filter(Boolean) // remove any missing pieces
 }
 
-function OutfitGenerator() {
+function OutfitGenerator({closet}) {
   const [occasion, setOccasion] = useState('College')
   const [outfit, setOutfit] = useState(null)
 
   function handleGenerate() {
-    setOutfit(generateOutfit(occasion))
+    setOutfit(generateOutfit(occasion,closet))
   }
 
   return (
