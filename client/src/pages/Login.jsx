@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -7,46 +8,55 @@ function Login() {
   function handleSubmit(e) {
     e.preventDefault()
     console.log('Login attempt:', { email, password })
-    // TODO: replace with real API call once backend auth is ready
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-bone)' }}>
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm"
+        className="bg-white p-8 border w-full max-w-sm"
+        style={{ borderColor: 'var(--color-border)' }}
       >
-        <h1 className="text-2xl font-bold mb-6 text-center">Log in</h1>
+        <h1 className="font-display text-3xl mb-6 text-center" style={{ color: 'var(--color-ink)' }}>
+          Log in
+        </h1>
 
-        <label className="block mb-2 text-sm font-medium">Email</label>
+        <label className="block mb-2 text-xs uppercase tracking-widest" style={{ color: 'var(--color-tan)' }}>
+          Email
+        </label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
+          className="w-full border px-3 py-2 mb-4"
+          style={{ borderColor: 'var(--color-border)' }}
           placeholder="you@example.com"
           required
         />
 
-        <label className="block mb-2 text-sm font-medium">Password</label>
+        <label className="block mb-2 text-xs uppercase tracking-widest" style={{ color: 'var(--color-tan)' }}>
+          Password
+        </label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-gray-300 rounded px-3 py-2 mb-6"
+          className="w-full border px-3 py-2 mb-6"
+          style={{ borderColor: 'var(--color-border)' }}
           placeholder="••••••••"
           required
         />
 
         <button
           type="submit"
-          className="w-full bg-black text-white rounded py-2 font-medium hover:bg-gray-800"
+          className="w-full py-2 font-medium text-white"
+          style={{ backgroundColor: 'var(--color-ink)' }}
         >
           Log in
         </button>
 
-        <p className="text-sm text-center mt-4">
-          Don't have an account? <a href="/signup" className="underline">Sign up</a>
+        <p className="text-sm text-center mt-4" style={{ color: 'var(--color-tan)' }}>
+          Don't have an account? <Link to="/signup" className="underline">Sign up</Link>
         </p>
       </form>
     </div>
