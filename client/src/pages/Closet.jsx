@@ -2,7 +2,10 @@ import { useState } from 'react'
 import ClothingCard from '../components/ClothingCard'
 import SeamDivider from '../components/SeamDivider'
 
-function Closet({ closet }) {
+function Closet({ closet,loading }) {
+  if (loading) {
+    return <p className="p-8" style={{ color: 'var(--color-tan)' }}>Loading your closet...</p>
+  }
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [colorFilter, setColorFilter] = useState('All')
 
@@ -17,6 +20,7 @@ function Closet({ closet }) {
     return matchesCategory && matchesColor
   })
 
+ 
   return (
     <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--color-bone)' }}>
       <div

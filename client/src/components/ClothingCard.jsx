@@ -19,7 +19,7 @@ function ClothingCard({ item }) {
         {item.category} — {item.color}
       </div>
       <div className="font-display text-base" style={{ color: 'var(--color-ink)' }}>
-        {item.brand}
+        {item.subCategory || item.brand}
       </div>
     </div>
   )
