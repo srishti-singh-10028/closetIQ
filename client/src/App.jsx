@@ -44,7 +44,7 @@ function App() {
         <Route path="/closet" element={<Closet closet={closet} loading={loading} />} />
         <Route path="/outfit-generator" element={<OutfitGenerator closet={closet} />} />
         <Route path="/add-item" element={<AddItem onAddItem={addItem} />} />
-        <Route path="/history" element={<History closet={closet} />} />
+        <Route path="/history" element={<History />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>

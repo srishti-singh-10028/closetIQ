@@ -1,17 +1,26 @@
-import { mockOutfitHistory } from '../data/mockOutfitHistory'
+import { useState, useEffect } from 'react'
+import { getOutfitHistory } from '../api/outfits'
 import ClothingCard from '../components/ClothingCard'
 
-function formatDate(isoString) {
-  return new Date(isoString).toLocaleDateString('en-IN', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  })
-}
+function History() {
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
 
-function History({ closet }) {
-  // sort newest first
-  const sortedHistory = [...mockOutfitHistory].sort(
-    (a, b) => new Date(b.dateWorn) - new Date(a.dateWorn)
-  )
+  useEffect(() => {
+    getOutfitHistory()
+      .then((data) => {
+        setHistory(data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Failed to load history:', err)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) {
+    return <p className="p-8" style={{ color: 'var(--color-tan)' }}>Loading your outfit history...</p>
+  }
 
   return (
     <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--color-bone)' }}>
@@ -19,33 +28,30 @@ function History({ closet }) {
         Outfit history
       </h1>
 
-      {sortedHistory.length === 0 ? (
+      {history.length === 0 ? (
         <p style={{ color: 'var(--color-tan)' }}>No outfits logged yet.</p>
       ) : (
         <div className="space-y-8">
-          {sortedHistory.map((outfit) => {
-            // look up full item details using the stored IDs
-            const items = closet.filter((item) => outfit.itemIds.includes(item._id))
-
-            return (
-              <div key={outfit._id} className="border-b pb-6" style={{ borderColor: 'var(--color-border)' }}>
-                <div className="flex justify-between items-baseline mb-3">
-                  <span className="font-display text-lg" style={{ color: 'var(--color-ink)' }}>
-                    {outfit.occasion}
-                  </span>
+          {history.map((outfit) => (
+            <div key={outfit._id} className="border-b pb-6" style={{ borderColor: 'var(--color-border)' }}>
+              <div className="flex justify-between items-baseline mb-3">
+                <span className="font-display text-lg" style={{ color: 'var(--color-ink)' }}>
+                  {outfit.occasion}
+                </span>
+                {outfit.weatherContext && (
                   <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--color-tan)' }}>
-                    {formatDate(outfit.dateWorn)} · {outfit.weatherAtGeneration.temp}°C
+                    {outfit.weatherContext.temp}°C · {outfit.weatherContext.condition}
                   </span>
-                </div>
-
-                <div className="grid grid-cols-4 gap-4 max-w-2xl">
-                  {items.map((item) => (
-                    <ClothingCard key={item._id} item={item} />
-                  ))}
-                </div>
+                )}
               </div>
-            )
-          })}
+
+              <div className="grid grid-cols-4 gap-4 max-w-2xl">
+                {outfit.items.map((item) => (
+                  <ClothingCard key={item._id} item={item} />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
