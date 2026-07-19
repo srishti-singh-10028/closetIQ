@@ -1,12 +1,36 @@
 const express = require('express');
+const multer = require('multer');
+const cloudinary = require('../config/cloudinary');
 const ClosetItem = require('../models/ClosetItem');
 const authMiddleware = require('../middleware/auth');
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 const router = express.Router();
 
-router.post('/', authMiddleware, async (req, res) => {
+const streamUpload = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'closetIQ' },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+    stream.end(buffer);
+  });
+};
+
+router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
   try {
-    const { imageUrl, category, subCategory, color, season, tags } = req.body;
+    const { category, subCategory, color, season, tags } = req.body;
+
+    let imageUrl = '';
+    if (req.file) {
+      const result = await streamUpload(req.file.buffer);
+      imageUrl = result.secure_url;
+    }
+
     const newItem = new ClosetItem({
       userId: req.userId,
       imageUrl,
@@ -16,6 +40,7 @@ router.post('/', authMiddleware, async (req, res) => {
       season,
       tags
     });
+
     await newItem.save();
     res.status(201).json(newItem);
   } catch (err) {
