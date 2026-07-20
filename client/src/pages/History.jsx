@@ -40,7 +40,7 @@ function History() {
                 </span>
                 {outfit.weatherContext && (
                   <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--color-tan)' }}>
-                    {outfit.weatherContext.temp}°C · {outfit.weatherContext.condition}
+                    {outfit.weatherContext}
                   </span>
                 )}
               </div>

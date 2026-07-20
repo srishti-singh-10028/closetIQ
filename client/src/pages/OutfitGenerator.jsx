@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ClothingCard from '../components/ClothingCard'
 import SeamDivider from '../components/SeamDivider'
+import { createOutfit } from '../api/outfits'
 
 const occasions = ['College', 'Party', 'Interview', 'Casual', 'Fest']
 
@@ -13,9 +14,14 @@ const occasionStyleMap = {
   Fest: 'Party',
 }
 
-function generateOutfit(occasion,closet) {
-  const targetStyle = occasionStyleMap[occasion]
-  const matching = closet.filter((item) => item.style === targetStyle)
+function generateOutfit(occasion, closet) {
+  const targetStyle = occasionStyleMap[occasion].toLowerCase()
+
+  const matching = closet.filter((item) => {
+  if (!item.tags) return false
+  const tagsText = Array.isArray(item.tags) ? item.tags.join(' ') : item.tags
+  return tagsText.toLowerCase().includes(targetStyle)
+})
 
   const top = matching.find((i) => i.category === 'Top')
   const dress = matching.find((i) => i.category === 'Dress')
@@ -23,18 +29,35 @@ function generateOutfit(occasion,closet) {
   const shoes = matching.find((i) => i.category === 'Shoes')
   const accessory = matching.find((i) => i.category === 'Accessories')
 
-  // prefer a dress alone, otherwise top+bottom
   const outfit = dress ? [dress, shoes, accessory] : [top, bottom, shoes, accessory]
-  return outfit.filter(Boolean) // remove any missing pieces
+  return outfit.filter(Boolean)
 }
+
 
 function OutfitGenerator({closet}) {
   const [occasion, setOccasion] = useState('College')
   const [outfit, setOutfit] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
-  function handleGenerate() {
-    setOutfit(generateOutfit(occasion,closet))
+   function handleGenerate() {
+    setOutfit(generateOutfit(occasion, closet))
+    setSaved(false)
   }
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      await createOutfit(occasion, outfit, { temp: 28, condition: 'Clear' }) // placeholder weather until real weather API exists
+      setSaved(true)
+    } catch (err) {
+      console.error('Save outfit error:', err)
+      alert('Failed to save outfit: ' + err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
 
   return (
     <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--color-bone)' }}>
@@ -68,7 +91,7 @@ function OutfitGenerator({closet}) {
         </button>
       </div>
 
-      {outfit && (
+       {outfit && (
         <>
           <SeamDivider label={`your ${occasion.toLowerCase()} outfit`} />
           {outfit.length === 0 ? (
@@ -76,11 +99,22 @@ function OutfitGenerator({closet}) {
               Not enough matching items in your closet for this occasion yet.
             </p>
           ) : (
-            <div className="grid grid-cols-3 gap-4 max-w-2xl">
-              {outfit.map((item) => (
-                <ClothingCard key={item._id} item={item} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-3 gap-4 max-w-2xl mb-6">
+                {outfit.map((item) => (
+                  <ClothingCard key={item._id} item={item} />
+                ))}
+              </div>
+
+              <button
+                onClick={handleSave}
+                disabled={saving || saved}
+                className="px-6 py-2 font-medium border disabled:opacity-50"
+                style={{ borderColor: 'var(--color-ink)', color: 'var(--color-ink)' }}
+              >
+                {saved ? 'Saved to history ✓' : saving ? 'Saving...' : 'Wear this outfit'}
+              </button>
+            </>
           )}
         </>
       )}

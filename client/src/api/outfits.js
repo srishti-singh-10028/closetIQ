@@ -13,3 +13,29 @@ export async function getOutfitHistory() {
 
   return res.json()
 }
+
+export async function createOutfit(occasion, items, weatherContext) {
+  const token = localStorage.getItem('token')
+
+  const res = await fetch(`${API_URL}/api/outfits`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      occasion,
+      items: items.map((item) => item._id),
+      weatherContext: `${weatherContext.temp}°C, ${weatherContext.condition}`, // now a plain string
+      aiGenerated: false,
+    }),
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || 'Failed to save outfit')
+  }
+
+  return res.json()
+}
+
