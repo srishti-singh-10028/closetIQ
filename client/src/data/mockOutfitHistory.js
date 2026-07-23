@@ -1,7 +1,7 @@
 export const mockOutfitHistory = [
   {
     _id: "o1",
-    occasion: "College",
+    occasion: "casual",
     itemIds: ["1", "5", "3"], // references _id values from mockCloset
     weatherAtGeneration: { temp: 30, condition: "Sunny" },
     dateWorn: "2026-07-15T00:00:00.000Z",
@@ -9,7 +9,7 @@ export const mockOutfitHistory = [
   },
   {
     _id: "o2",
-    occasion: "Interview",
+    occasion: "work",
     itemIds: ["4", "10", "12"],
     weatherAtGeneration: { temp: 27, condition: "Cloudy" },
     dateWorn: "2026-07-16T00:00:00.000Z",

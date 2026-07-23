@@ -89,7 +89,7 @@ function OutfitGenerator({closet}) {
 
        {outfit && (
         <>
-          <SeamDivider label={`your ${occasion.toLowerCase()} outfit`} />
+          <SeamDivider label={`your ${occasion} outfit`} />
           {outfit.length === 0 ? (
             <p style={{ color: 'var(--color-tan)' }}>
               Not enough matching items in your closet for this occasion yet.
