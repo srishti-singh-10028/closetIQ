@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { addClosetItem } from '../api/closet'
 
-const categories = ['Top', 'Bottom', 'Dress', 'Shoes', 'Accessories']
+const categories = ['top', 'bottom', 'dress', 'footwear', 'outerwear', 'accessory']
 const seasons = ['Summer', 'Winter', 'Monsoon', 'All-season']
 
 function AddItem({ onAddItem }) {

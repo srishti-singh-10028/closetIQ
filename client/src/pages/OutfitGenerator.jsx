@@ -3,25 +3,21 @@ import ClothingCard from '../components/ClothingCard'
 import SeamDivider from '../components/SeamDivider'
 import { createOutfit } from '../api/outfits'
 
-const occasions = ['College', 'Party', 'Interview', 'Casual', 'Fest']
+const occasions = ['casual', 'work', 'party']
 
 // crude mapping for now — Person C's real AI will replace this logic later
 const occasionStyleMap = {
-  College: 'Casual',
-  Party: 'Party',
-  Interview: 'Formal',
-  Casual: 'Casual',
-  Fest: 'Party',
+  casual: 'casual',
+  work: 'formal',
+  party: 'party',
 }
 
 function generateOutfit(occasion, closet) {
   const targetStyle = occasionStyleMap[occasion].toLowerCase()
 
-  const matching = closet.filter((item) => {
-  if (!item.tags) return false
-  const tagsText = Array.isArray(item.tags) ? item.tags.join(' ') : item.tags
-  return tagsText.toLowerCase().includes(targetStyle)
-})
+ const matching = closet.filter((item) =>
+  item.tags && item.tags.some((tag) => tag.toLowerCase().includes(targetStyle))
+)
 
   const top = matching.find((i) => i.category === 'Top')
   const dress = matching.find((i) => i.category === 'Dress')
