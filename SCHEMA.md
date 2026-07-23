@@ -69,7 +69,7 @@ If you need to change something here, message the team first — this file is th
 ```
 **Allowed values:**
 - `occasion`: `"casual"` | `"work"` | `"party"` — **lowercase, exact strings, only 3 options currently**
-  - ⚠️ Original MVP plan mentioned 5 occasions (College/Party/Interview/Casual/Fest). Current backend only supports these 3. **Team needs to decide:** either expand the backend schema to support more occasions, or narrow the frontend UI to match these 3. Not yet resolved as of this update.
+  - Team decided: 3 occasions (casual/work/party) is sufficient for MVP scope. Original 5-occasion plan (College/Party/Interview/Casual/Fest) is dropped.
 - `items`: array of ClosetItem `_id` values that make up this outfit (must already exist in that user's closet — AI never invents new items)
 - `weatherContext`: **plain string**, not a nested object — e.g. `"sunny, 32°C"`. Backend `.populate('items')` automatically fills in full ClosetItem details when fetching, so frontend doesn't need to manually look up items by ID.
 - `aiGenerated`: `true` once Person C's real AI generates the outfit, `false` for rule-based/manual generation (current placeholder logic)
