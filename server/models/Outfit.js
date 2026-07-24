@@ -19,6 +19,10 @@ const outfitSchema = new mongoose.Schema({
   aiGenerated: {
     type: Boolean,
     default: false
+  },
+  dateWorn: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 

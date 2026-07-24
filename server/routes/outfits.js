@@ -4,7 +4,6 @@ const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
-// CREATE - Save a new outfit
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { items, weatherContext, occasion, aiGenerated } = req.body;
@@ -24,7 +23,21 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// READ - Get all outfits for logged-in user
+router.get('/history', authMiddleware, async (req, res) => {
+  try {
+    const history = await Outfit.find({
+      userId: req.userId,
+      dateWorn: { $ne: null }
+    })
+      .populate('items')
+      .sort({ dateWorn: -1 });
+
+    res.status(200).json(history);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const outfits = await Outfit.find({ userId: req.userId }).populate('items');
@@ -34,7 +47,6 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// READ - Get single outfit by ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const outfit = await Outfit.findOne({ _id: req.params.id, userId: req.userId }).populate('items');
@@ -47,7 +59,23 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// DELETE - Remove an outfit
+router.patch('/:id/wear', authMiddleware, async (req, res) => {
+  try {
+    const outfit = await Outfit.findOne({ _id: req.params.id, userId: req.userId });
+
+    if (!outfit) {
+      return res.status(404).json({ message: 'Outfit not found' });
+    }
+
+    outfit.dateWorn = new Date();
+    await outfit.save();
+
+    res.status(200).json(outfit);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const outfit = await Outfit.findOneAndDelete({ _id: req.params.id, userId: req.userId });
