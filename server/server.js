@@ -6,6 +6,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const closetItemRoutes = require('./routes/closetItems');
 const outfitRoutes = require('./routes/outfits');
+const userRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/closet', closetItemRoutes);
 app.use('/api/outfits', outfitRoutes);
+app.use('/api/users', userRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
