@@ -72,7 +72,11 @@ Rules:
   top (skip bottom if you picked a dress), one "footwear", "outerwear" and
   "accessory" optional.
 - Only use categories that actually exist in the closet — don't force it.
-- Match the occasion: ${occasion}
+- Match the occasion: ${occasion}. Strongly prefer items whose "tags" array
+  contains a word related to the occasion (e.g. for "work" or "interview",
+  prefer items tagged "formal"; for "casual" or "college", prefer items
+  tagged "casual"). Avoid mixing clearly mismatched tags (e.g. a "formal"
+  bottom with "casual" shoes) unless no better option exists in the closet.
 - Weather: ${weatherContext}. Avoid outerwear/heavy layers if temperature is
   above 28C. Prefer covered footwear/layering if temperature is below 15C or
   the description suggests rain.
