@@ -24,6 +24,7 @@ app.use('/api/closet', closetItemRoutes);
 app.use('/api/outfits', outfitRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/ai', require('./routes/ai'));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
