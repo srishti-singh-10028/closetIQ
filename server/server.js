@@ -9,6 +9,7 @@ const outfitRoutes = require('./routes/outfits');
 const userRoutes = require('./routes/users');
 const weatherRoutes = require('./routes/weather');
 const aiRoutes = require('./routes/ai');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,7 @@ app.use('/api/outfits', outfitRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/upload', uploadRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
