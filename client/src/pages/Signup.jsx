@@ -1,24 +1,25 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { signupUser } from '../api/auth'
 
 function Signup() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const navigate = useNavigate()
 
   function handleSubmit(e) {
-  e.preventDefault()
-  signupUser(name, email, password)
-    .then((data) => {
-      console.log('Signed up:', data)
-      alert('Signup successful! Now try logging in.')
-    })
-    .catch((err) => {
-      console.error('Signup error:', err)
-      alert('Signup failed: ' + err.message)
-    })
-}
+    e.preventDefault()
+    signupUser(name, email, password)
+      .then((data) => {
+        alert('Signup successful! Now log in.')
+        navigate('/')
+      })
+      .catch((err) => {
+        console.error('Signup error:', err)
+        alert('Signup failed: ' + err.message)
+      })
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-bone)' }}>
