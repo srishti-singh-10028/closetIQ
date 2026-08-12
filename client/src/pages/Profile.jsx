@@ -1,16 +1,49 @@
-import { useState } from 'react'
-import { mockUser } from '../data/mockUser'
+import { useState, useEffect } from 'react'
+import { getCurrentUser, updateCurrentUser } from '../api/users'
 
 function Profile() {
-  const [name, setName] = useState(mockUser.name)
-  const [city, setCity] = useState(mockUser.location.city)
+  const [user, setUser] = useState(null)
+  const [name, setName] = useState('')
+  const [location, setLocation] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
 
-  function handleSave(e) {
+  useEffect(() => {
+    getCurrentUser()
+      .then((data) => {
+        setUser(data)
+        setName(data.name)
+        setLocation(data.location || '')
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Failed to load user:', err)
+        setLoading(false)
+      })
+  }, [])
+
+  async function handleSave(e) {
     e.preventDefault()
-    setIsEditing(false)
-    // TODO: replace with PATCH /api/users/me once backend auth exists
-    console.log('Saved profile:', { name, city })
+    setSaving(true)
+    try {
+      const updated = await updateCurrentUser(name, location)
+      setUser(updated)
+      setIsEditing(false)
+    } catch (err) {
+      console.error('Failed to save profile:', err)
+      alert('Failed to save changes: ' + err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return <p className="p-8" style={{ color: 'var(--color-tan)' }}>Loading your profile...</p>
+  }
+
+  if (!user) {
+    return <p className="p-8" style={{ color: 'var(--color-tan)' }}>Could not load profile. Try logging in again.</p>
   }
 
   return (
@@ -41,7 +74,7 @@ function Profile() {
         </label>
         <input
           type="email"
-          value={mockUser.email}
+          value={user.email}
           disabled
           className="w-full border px-3 py-2 mb-4 bg-gray-100"
           style={{ borderColor: 'var(--color-border)' }}
@@ -52,29 +85,31 @@ function Profile() {
         </label>
         <input
           type="text"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
           disabled={!isEditing}
+          placeholder="e.g. Dhanbad, India"
           className="w-full border px-3 py-2 mb-6 disabled:bg-gray-100"
           style={{ borderColor: 'var(--color-border)' }}
         />
 
-      {isEditing && (
+        {isEditing && (
           <button
             type="submit"
-            className="w-full py-2 text-white font-medium"
+            disabled={saving}
+            className="w-full py-2 text-white font-medium disabled:opacity-50"
             style={{ backgroundColor: 'var(--color-ink)' }}
           >
-            Save changes
+            {saving ? 'Saving...' : 'Save changes'}
           </button>
         )}
       </form>
 
-     {!isEditing && (
+      {!isEditing && (
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="w-full max-w-md py-2 font-medium border mt-0"
+          className="w-full max-w-md py-2 font-medium border mt-4"
           style={{ borderColor: 'var(--color-ink)', color: 'var(--color-ink)' }}
         >
           Edit profile

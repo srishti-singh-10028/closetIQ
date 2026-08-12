@@ -1,5 +1,5 @@
-import { useState ,useEffect} from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route , useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -8,19 +8,23 @@ import OutfitGenerator from './pages/OutfitGenerator'
 import AddItem from './pages/AddItem'
 import Profile from './pages/Profile'
 import History from './pages/History'
-import { getClosetItems } from './api/closet'
+import { getClosetItems, deleteClosetItem } from './api/closet'
+import OutfitOfTheDay from './pages/OutfitOfTheDay'
 
-function App() {
+function AppContent() {
+  const location = useLocation()
+  const hideNavbar = location.pathname === '/' || location.pathname === '/signup'
+
   const [closet, setCloset] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     getClosetItems()
-      .then((data) => {  //runs if it succeeds
+      .then((data) => {
         setCloset(data)
         setLoading(false)
       })
-      .catch((err) => {   // runs if something fails (like a network error or bad token)
+      .catch((err) => {
         console.error('Failed to load closet:', err)
         setLoading(false)
       })
@@ -30,23 +34,37 @@ function App() {
     setCloset((prev) => [...prev, newItem])
   }
 
-
-  function addItem(newItem) {
-    setCloset((prev) => [...prev, newItem])
+  async function handleDeleteItem(id) {
+    try {
+      await deleteClosetItem(id)
+      setCloset((prev) => prev.filter((item) => item._id !== id))
+    } catch (err) {
+      console.error('Failed to delete item:', err)
+      alert('Failed to delete item: ' + err.message)
+    }
   }
 
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/closet" element={<Closet closet={closet} loading={loading} />} />
+        <Route path="/closet" element={<Closet closet={closet} loading={loading} onDeleteItem={handleDeleteItem} />} />
         <Route path="/outfit-generator" element={<OutfitGenerator closet={closet} />} />
         <Route path="/add-item" element={<AddItem onAddItem={addItem} />} />
         <Route path="/history" element={<History />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/outfit-of-the-day" element={<OutfitOfTheDay closet={closet} loading={loading} />} />
       </Routes>
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   )
 }

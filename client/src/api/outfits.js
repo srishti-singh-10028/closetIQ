@@ -26,7 +26,7 @@ export async function createOutfit(occasion, items, weatherContext) {
     body: JSON.stringify({
       occasion,
       items: items.map((item) => item._id),
-      weatherContext: `${weatherContext.temp}°C, ${weatherContext.condition}`, // now a plain string
+      weatherContext,
       aiGenerated: false,
     }),
   })
@@ -39,3 +39,22 @@ export async function createOutfit(occasion, items, weatherContext) {
   return res.json()
 }
 
+export async function generateAIOutfit(occasion) {
+  const token = localStorage.getItem('token')
+
+  const res = await fetch(`${API_URL}/api/ai/generate-outfit`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ occasion }),
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.message || 'Failed to generate outfit')
+  }
+
+  return res.json()
+}

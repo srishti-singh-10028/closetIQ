@@ -14,6 +14,18 @@ export async function getClosetItems() {
   return res.json()
 }
 
+export async function deleteClosetItem(id) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${API_URL}/api/closet/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    throw new Error('Failed to delete item')
+  }
+  return res.json()
+}
+
 export async function addClosetItem(imageFile, category, subCategory, color, season, tags) {
   const token = localStorage.getItem('token')
 
@@ -37,4 +49,22 @@ export async function addClosetItem(imageFile, category, subCategory, color, sea
   }
 
   return res.json()
+}
+
+export async function uploadImage(imageFile) {
+  const token = localStorage.getItem('token')
+  const formData = new FormData()
+  formData.append('image', imageFile)
+
+  const res = await fetch(`${API_URL}/api/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to upload image')
+  }
+
+  return res.json() // { imageUrl }
 }

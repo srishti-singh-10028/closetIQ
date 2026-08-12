@@ -1,65 +1,70 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ClothingCard from '../components/ClothingCard'
 import SeamDivider from '../components/SeamDivider'
-import { createOutfit } from '../api/outfits'
+import { generateAIOutfit } from '../api/outfits'
+import { getCurrentWeather } from '../api/weather'
+import { detectLocation } from '../utils/detectLocation'
+import { getCurrentUser, updateCurrentUser } from '../api/users'
 
 const occasions = ['casual', 'work', 'party']
 
-// crude mapping for now — Person C's real AI will replace this logic later
-const occasionStyleMap = {
-  casual: 'casual',
-  work: 'formal',
-  party: 'party',
-}
-
-function generateOutfit(occasion, closet) {
-  const targetStyle = occasionStyleMap[occasion].toLowerCase()
-
- const matching = closet.filter((item) =>
-  item.tags && item.tags.some((tag) => tag.toLowerCase().includes(targetStyle))
-)
-
-  const top = matching.find((i) => i.category === 'Top')
-  const dress = matching.find((i) => i.category === 'Dress')
-  const bottom = matching.find((i) => i.category === 'Bottom')
-  const shoes = matching.find((i) => i.category === 'Shoes')
-  const accessory = matching.find((i) => i.category === 'Accessories')
-
-  const outfit = dress ? [dress, shoes, accessory] : [top, bottom, shoes, accessory]
-  return outfit.filter(Boolean)
-}
-
-
-function OutfitGenerator({closet}) {
-  const [occasion, setOccasion] = useState('College')
+function OutfitGenerator({ closet }) {
+  const [occasion, setOccasion] = useState('casual')
   const [outfit, setOutfit] = useState(null)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [weather, setWeather] = useState(null)
+  const [error, setError] = useState(null)
 
-   function handleGenerate() {
-    setOutfit(generateOutfit(occasion, closet))
-    setSaved(false)
-  }
+  useEffect(() => {
+    async function ensureLocationAndFetchWeather() {
+      try {
+        const user = await getCurrentUser()
 
-  async function handleSave() {
-    setSaving(true)
+        if (!user.location) {
+          const city = await detectLocation()
+          await updateCurrentUser(user.name, city)
+        }
+
+        const weatherData = await getCurrentWeather()
+        setWeather(weatherData)
+      } catch (err) {
+        console.error('Weather/location setup failed:', err)
+      }
+    }
+
+    ensureLocationAndFetchWeather()
+  }, [])
+
+  async function handleGenerate() {
+    setGenerating(true)
+    setError(null)
+    setOutfit(null)
     try {
-      await createOutfit(occasion, outfit, { temp: 28, condition: 'Clear' }) // placeholder weather until real weather API exists
-      setSaved(true)
+      const savedOutfit = await generateAIOutfit(occasion)
+      // savedOutfit.items is an array of ClosetItem IDs — map back to full items from closet prop
+      const fullItems = savedOutfit.items
+        .map((id) => closet.find((item) => item._id === id))
+        .filter(Boolean)
+      setOutfit(fullItems)
     } catch (err) {
-      console.error('Save outfit error:', err)
-      alert('Failed to save outfit: ' + err.message)
+      console.error('Generate outfit error:', err)
+      setError(err.message || 'Failed to generate outfit')
     } finally {
-      setSaving(false)
+      setGenerating(false)
     }
   }
-
 
   return (
     <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--color-bone)' }}>
       <h1 className="font-display text-2xl mb-6" style={{ color: 'var(--color-ink)' }}>
         Generate an outfit
       </h1>
+
+      {weather && (
+        <p className="text-xs uppercase tracking-widest mb-4" style={{ color: 'var(--color-tan)' }}>
+          Current weather: {weather.description}, {weather.temperature}°C in {weather.location}
+        </p>
+      )}
 
       <div className="flex gap-4 items-end mb-8">
         <div>
@@ -80,14 +85,21 @@ function OutfitGenerator({closet}) {
 
         <button
           onClick={handleGenerate}
-          className="px-6 py-2 text-white font-medium"
+          disabled={generating}
+          className="px-6 py-2 text-white font-medium disabled:opacity-50"
           style={{ backgroundColor: 'var(--color-ink)' }}
         >
-          Generate
+          {generating ? 'Generating...' : 'Generate'}
         </button>
       </div>
 
-       {outfit && (
+      {error && (
+        <p className="mb-4" style={{ color: 'var(--color-tan)' }}>
+          {error}
+        </p>
+      )}
+
+      {outfit && (
         <>
           <SeamDivider label={`your ${occasion} outfit`} />
           {outfit.length === 0 ? (
@@ -95,22 +107,11 @@ function OutfitGenerator({closet}) {
               Not enough matching items in your closet for this occasion yet.
             </p>
           ) : (
-            <>
-              <div className="grid grid-cols-3 gap-4 max-w-2xl mb-6">
-                {outfit.map((item) => (
-                  <ClothingCard key={item._id} item={item} />
-                ))}
-              </div>
-
-              <button
-                onClick={handleSave}
-                disabled={saving || saved}
-                className="px-6 py-2 font-medium border disabled:opacity-50"
-                style={{ borderColor: 'var(--color-ink)', color: 'var(--color-ink)' }}
-              >
-                {saved ? 'Saved to history ✓' : saving ? 'Saving...' : 'Wear this outfit'}
-              </button>
-            </>
+            <div className="grid grid-cols-3 gap-4 max-w-2xl mb-6">
+              {outfit.map((item) => (
+                <ClothingCard key={item._id} item={item} />
+              ))}
+            </div>
           )}
         </>
       )}

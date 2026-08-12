@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { addClosetItem } from '../api/closet'
+import { addClosetItem, uploadImage } from '../api/closet'
+import { categorizeItem } from '../api/ai'
 
 const categories = ['top', 'bottom', 'dress', 'footwear', 'outerwear', 'accessory']
 const seasons = ['Summer', 'Winter', 'Monsoon', 'All-season']
@@ -7,18 +8,42 @@ const seasons = ['Summer', 'Winter', 'Monsoon', 'All-season']
 function AddItem({ onAddItem }) {
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
-  const [category, setCategory] = useState('Top')
+  const [category, setCategory] = useState('top')
   const [subCategory, setSubCategory] = useState('')
   const [color, setColor] = useState('')
   const [season, setSeason] = useState('Summer')
   const [tags, setTags] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [categorizing, setCategorizing] = useState(false)
 
   function handleImageChange(e) {
     const file = e.target.files[0]
     if (file) {
       setImageFile(file)
       setImagePreview(URL.createObjectURL(file))
+    }
+  }
+
+  async function handleAutoFill() {
+    if (!imageFile) return
+    setCategorizing(true)
+    try {
+      const { imageUrl } = await uploadImage(imageFile)
+      const result = await categorizeItem(imageUrl)
+      setCategory(result.category || 'top')
+      setSubCategory(result.subCategory || '')
+      setColor(result.color || '')
+      if (result.season && result.season.length > 0) {
+        setSeason(result.season[0].charAt(0).toUpperCase() + result.season[0].slice(1))
+      }
+      if (result.tags && result.tags.length > 0) {
+        setTags(result.tags.join(', '))
+      }
+    } catch (err) {
+      console.error('Auto-categorize error:', err)
+      alert('Could not auto-fill details — you can still fill the form manually.')
+    } finally {
+      setCategorizing(false)
     }
   }
 
@@ -57,6 +82,18 @@ function AddItem({ onAddItem }) {
 
         {imagePreview && (
           <img src={imagePreview} alt="preview" className="w-32 h-32 object-cover mb-4 border" style={{ borderColor: 'var(--color-border)' }} />
+        )}
+
+        {imageFile && (
+          <button
+            type="button"
+            onClick={handleAutoFill}
+            disabled={categorizing}
+            className="w-full py-2 mb-6 font-medium border disabled:opacity-50"
+            style={{ borderColor: 'var(--color-ink)', color: 'var(--color-ink)' }}
+          >
+            {categorizing ? 'Analyzing photo...' : 'Auto-fill from photo'}
+          </button>
         )}
 
         <label className="block mb-2 text-xs uppercase tracking-widest" style={{ color: 'var(--color-tan)' }}>

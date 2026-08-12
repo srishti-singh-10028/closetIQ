@@ -1,23 +1,25 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { loginUser } from '../api/auth'
 
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const navigate = useNavigate()
 
- function handleSubmit(e) {
-  e.preventDefault()
-  loginUser(email, password)
-    .then((data) => {
-      console.log('Logged in:', data)
-      alert('Login successful!')
-    })
-    .catch((err) => {
-      console.error('Login error:', err)
-      alert('Login failed — check your email and password, or check console for details')
-    })
-}
+  function handleSubmit(e) {
+    e.preventDefault()
+    loginUser(email, password)
+      .then((data) => {
+        localStorage.setItem('token', data.token)
+        navigate('/closet')
+      })
+      .catch((err) => {
+        console.error('Login error:', err)
+        alert('Login failed — check your email and password, or check console for details')
+      })
+  }
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-bone)' }}>
