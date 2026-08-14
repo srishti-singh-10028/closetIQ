@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route , useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -19,6 +19,14 @@ function AppContent() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      setCloset([])
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
     getClosetItems()
       .then((data) => {
         setCloset(data)
@@ -26,9 +34,10 @@ function AppContent() {
       })
       .catch((err) => {
         console.error('Failed to load closet:', err)
+        setCloset([])
         setLoading(false)
       })
-  }, [])
+  }, [location.pathname])
 
   function addItem(newItem) {
     setCloset((prev) => [...prev, newItem])
