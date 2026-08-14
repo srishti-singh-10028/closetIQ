@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Closet from './pages/Closet'
@@ -59,12 +60,36 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/closet" element={<Closet closet={closet} loading={loading} onDeleteItem={handleDeleteItem} />} />
-        <Route path="/outfit-generator" element={<OutfitGenerator closet={closet} />} />
-        <Route path="/add-item" element={<AddItem onAddItem={addItem} />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/outfit-of-the-day" element={<OutfitOfTheDay closet={closet} loading={loading} />} />
+        <Route path="/closet" element={
+          <ProtectedRoute>
+            <Closet closet={closet} loading={loading} onDeleteItem={handleDeleteItem} />
+          </ProtectedRoute>
+        } />
+        <Route path="/outfit-generator" element={
+          <ProtectedRoute>
+            <OutfitGenerator closet={closet} />
+          </ProtectedRoute>
+        } />
+        <Route path="/add-item" element={
+          <ProtectedRoute>
+            <AddItem onAddItem={addItem} />
+          </ProtectedRoute>
+        } />
+        <Route path="/history" element={
+          <ProtectedRoute>
+            <History />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/outfit-of-the-day" element={
+          <ProtectedRoute>
+            <OutfitOfTheDay closet={closet} loading={loading} />
+          </ProtectedRoute>
+        } />
       </Routes>
     </>
   )
