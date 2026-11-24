@@ -15,7 +15,7 @@ const { GoogleGenAI } = require('@google/genai');
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // Tried in order. If the first is overloaded, fall back to the lighter one.
-const MODELS = ['gemini-flash-latest', 'gemini-flash-lite-latest'];
+const MODELS = ['gemini-3.8-flash'];
 const ATTEMPTS_PER_MODEL = 2;
 const REQUEST_TIMEOUT_MS = 20000;
 
