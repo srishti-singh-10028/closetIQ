@@ -7,7 +7,7 @@
 const { GoogleGenAI } = require('@google/genai');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const MODEL = 'gemini-flash-latest';
+const MODEL = 'gemini-1.5-flash';
 
 const VALID_CATEGORIES = ['top', 'bottom', 'dress', 'footwear', 'outerwear', 'accessory'];
 
