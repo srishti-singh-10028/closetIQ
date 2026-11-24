@@ -9,7 +9,7 @@ Built as a 3-person team project (MERN stack) over a 15-day timeline.
 **Frontend:** React, React Router, Tailwind CSS
 **Backend:** Node.js, Express, MongoDB (Mongoose)
 **Image storage:** Cloudinary
-**AI features:** Google Gemini (gemini-flash-latest) — outfit generation,auto-categorization
+**AI features:** Google Gemini (gemini-1.5-flash) — outfit generation,auto-categorization
 **Weather:** OpenWeatherMap API
 **Deployment:** Render (backend)
 

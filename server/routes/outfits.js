@@ -19,6 +19,7 @@ router.post('/', authMiddleware, async (req, res) => {
     await newOutfit.save();
     res.status(201).json(newOutfit);
   } catch (err) {
+    console.error("🔥 OUTFIT SAVE ERROR:", err); // <-- Add this
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
@@ -34,6 +35,7 @@ router.get('/history', authMiddleware, async (req, res) => {
 
     res.status(200).json(history);
   } catch (err) {
+    console.error("🔥 OUTFIT HISTORY FETCH ERROR:", err); // <-- Add this
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
