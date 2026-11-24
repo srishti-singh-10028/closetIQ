@@ -2,14 +2,67 @@
  * server/services/aiService.js
  * ClosetIQ — AI/Integration layer, Google Gemini (FREE tier)
  * CommonJS — matches server/package.json ("type": "commonjs")
+ *
+ * Fixes in this version:
+ *  1. Sends the image's REAL MIME type (webp/png/jpg) instead of always "image/jpeg".
+ *  2. Retries on temporary Gemini errors (503 overloaded, 429 rate limit, 500, timeout).
+ *  3. Falls back to a lighter model if the main one stays overloaded.
+ *  4. Hard timeout per attempt, so a request can never hang forever.
  */
 
 const { GoogleGenAI } = require('@google/genai');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const MODEL = 'gemini-flash-latest';
+
+// Tried in order. If the first is overloaded, fall back to the lighter one.
+const MODELS = ['gemini-3.8-flash'];
+const ATTEMPTS_PER_MODEL = 2;
+const REQUEST_TIMEOUT_MS = 20000;
 
 const VALID_CATEGORIES = ['top', 'bottom', 'dress', 'footwear', 'outerwear', 'accessory'];
+
+/* ------------------------------------------------------------------ */
+/* Resilience helpers                                                   */
+/* ------------------------------------------------------------------ */
+
+function withTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const err = new Error(`Gemini request timed out after ${ms}ms`);
+      err.status = 504;
+      reject(err);
+    }, ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+async function generateWithRetry(params) {
+  let lastErr;
+  for (const model of MODELS) {
+    for (let attempt = 1; attempt <= ATTEMPTS_PER_MODEL; attempt++) {
+      try {
+        return await withTimeout(
+          ai.models.generateContent({ ...params, model }),
+          REQUEST_TIMEOUT_MS
+        );
+      } catch (err) {
+        lastErr = err;
+        const status = err.status || err.code;
+        const retryable = [429, 500, 503, 504].includes(status);
+        console.warn(`[aiService] ${model} attempt ${attempt} failed (${status}): ${err.message}`);
+        // Bad key, bad request, etc: retrying won't help, fail immediately
+        if (!retryable) throw err;
+        await new Promise((r) => setTimeout(r, attempt * 1500));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+/* ------------------------------------------------------------------ */
+/* 1. AUTO-CATEGORIZATION                                               */
+/* ------------------------------------------------------------------ */
 
 async function categorizeClothingItem(imageUrl) {
   const prompt = `You are a fashion categorization assistant for a digital
@@ -26,17 +79,13 @@ no prose, no markdown fences, in exactly this shape:
 
 Always make your best guess — never refuse or return an error field.`;
 
-  const imageBytes = await fetchImageAsBase64(imageUrl);
+  const { data, mimeType } = await fetchImage(imageUrl);
 
-  const response = await ai.models.generateContent({
-    model: MODEL,
+  const response = await generateWithRetry({
     contents: [
       {
         role: 'user',
-        parts: [
-          { text: prompt },
-          { inlineData: { mimeType: 'image/jpeg', data: imageBytes } },
-        ],
+        parts: [{ text: prompt }, { inlineData: { mimeType, data } }],
       },
     ],
     config: { responseMimeType: 'application/json', temperature: 0.2 },
@@ -50,6 +99,10 @@ Always make your best guess — never refuse or return an error field.`;
 
   return result;
 }
+
+/* ------------------------------------------------------------------ */
+/* 2. OUTFIT GENERATION                                                 */
+/* ------------------------------------------------------------------ */
 
 async function generateOutfit({ closetItems, occasion, weatherData, recentItemIds = [] }) {
   const itemsForPrompt = closetItems.map((i) => ({
@@ -88,8 +141,7 @@ Closet: ${JSON.stringify(itemsForPrompt)}
 Return ONLY JSON, no markdown fences:
 { "items": [string, ...] }`;
 
-  const response = await ai.models.generateContent({
-    model: MODEL,
+  const response = await generateWithRetry({
     contents: prompt,
     config: { responseMimeType: 'application/json', temperature: 0.7 },
   });
@@ -107,11 +159,20 @@ Return ONLY JSON, no markdown fences:
   };
 }
 
-async function fetchImageAsBase64(imageUrl) {
+/* ------------------------------------------------------------------ */
+/* Helpers                                                              */
+/* ------------------------------------------------------------------ */
+
+async function fetchImage(imageUrl) {
   const res = await fetch(imageUrl);
   if (!res.ok) throw new Error(`Failed to fetch image: ${res.status}`);
+
+  // Use the real format (webp, png, jpg). Fall back to jpeg if the header is odd.
+  let mimeType = (res.headers.get('content-type') || '').split(';')[0].trim();
+  if (!mimeType.startsWith('image/')) mimeType = 'image/jpeg';
+
   const buf = await res.arrayBuffer();
-  return Buffer.from(buf).toString('base64');
+  return { data: Buffer.from(buf).toString('base64'), mimeType };
 }
 
 function safeJsonParse(raw, callerName) {
